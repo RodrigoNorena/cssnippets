@@ -12,11 +12,13 @@ let selectedColor = '#fff4a3';
 let draggedNoteId = null;
 let isEditingMode = false;
 let previewTextLength = 150;
+let noteLayout = 'grid';
 
 const noteTitle = document.getElementById('noteTitle');
 const noteCategory = document.getElementById('noteCategory');
 const notesContainer = document.getElementById('notesContainer');
 const filtersContainer = document.getElementById('filters');
+const layoutToggleBtn = document.getElementById('layoutToggleBtn');
 const notesPanel = document.getElementById('notesPanel');
 const importXmlInput = document.getElementById('importXmlInput');
 const addCategoryBtn = document.getElementById('addCategoryBtn');
@@ -117,10 +119,27 @@ function renderFilters() {
     });
 }
 
+function updateLayoutToggleButton() {
+    if (!layoutToggleBtn) return;
+    layoutToggleBtn.textContent = `Vista: ${noteLayout === 'grid' ? 'Cuadrícula' : 'Lista'}`;
+    layoutToggleBtn.setAttribute('title', noteLayout === 'grid' ? 'Cambiar a vista de lista' : 'Cambiar a vista de cuadrícula');
+}
+
+function setNotesLayout(layout) {
+    noteLayout = layout === 'list' ? 'list' : 'grid';
+    notesContainer.classList.toggle('notes-list-view', noteLayout === 'list');
+    notesContainer.classList.toggle('notes-grid-view', noteLayout === 'grid');
+    updateLayoutToggleButton();
+    renderNotes();
+}
+
 function renderNotes() {
     const filteredNotes = currentFilter === 'all'
         ? notes
         : notes.filter(note => (note.category || 'General') === currentFilter);
+
+    notesContainer.classList.toggle('notes-list-view', noteLayout === 'list');
+    notesContainer.classList.toggle('notes-grid-view', noteLayout === 'grid');
 
     if (!filteredNotes.length) {
         notesContainer.innerHTML = '<div class="empty-state">No hay notas para esta categoría.</div>';
@@ -132,11 +151,22 @@ function renderNotes() {
         const previewText = stripHtml(note.content || '');
         const snippet = previewText ? (previewText.length > previewTextLength ? previewText.slice(0, previewTextLength) + '...' : previewText) : 'Sin contenido';
         const isSelected = currentSelectedNoteId === note.id ? 'style="outline: 2px solid rgba(64, 103, 255, 0.5);"' : '';
+        const listMode = noteLayout === 'list';
+        const previewMarkup = listMode
+            ? ''
+            : `<div class="note-preview">${escapeHtml(snippet)}</div>`;
+        const titleMarkup = listMode
+            ? `<h4 class="note-title-inline">${noteTitleText}</h4>`
+            : `<h4>${noteTitleText}</h4>`;
+        const footerMarkup = listMode
+            ? ''
+            : `<div class="note-card-footer"><span>${formatDate(note.updatedAt || note.createdAt)}</span></div>`;
 
         return `
-            <article class="note-card" data-id="${note.id}" draggable="true" style="--note-color: ${note.color || '#fff4a3'};" ${isSelected}>
+            <article class="note-card ${listMode ? 'is-list' : 'is-grid'}" data-id="${note.id}" draggable="true" style="--note-color: ${note.color || '#fff4a3'};" ${isSelected}>
                 <div class="note-card-header">
                     <span class="note-category">${escapeHtml(note.category || 'General')}</span>
+                    ${listMode ? titleMarkup : ''}
                     <div class="note-actions">
                         <button type="button" data-action="load" data-id="${note.id}" aria-label="Cargar nota" title="Cargar nota">&#x1F441;</button>
                         <button type="button" data-action="copy" data-id="${note.id}" aria-label="Copiar nota con formato" title="Copiar nota con formato">&#x1F4CB;</button>
@@ -144,16 +174,45 @@ function renderNotes() {
                     </div>
                 </div>
 
-                <h4>${noteTitleText}</h4>
-                <div class="note-preview">${escapeHtml(snippet)}</div>
-                <div class="note-card-footer">
-                    <span>${formatDate(note.updatedAt || note.createdAt)}</span>
-                </div>
+                ${!listMode ? titleMarkup : ''}
+                ${previewMarkup}
+                <div class="note-hover-preview"></div>
+                ${footerMarkup}
             </article>
         `;
     }).join('');
 
     notesContainer.querySelectorAll('.note-card').forEach(card => {
+        const noteId = card.dataset.id;
+        const note = notes.find(item => item.id === noteId);
+        const hoverPreview = card.querySelector('.note-hover-preview');
+
+        if (hoverPreview) {
+            let hoverTimer = null;
+
+            const showPreview = () => {
+                if (!note) return;
+                hoverPreview.innerHTML = note.content || '<p>Sin contenido</p>';
+                hoverPreview.classList.add('visible');
+            };
+
+            const hidePreview = () => {
+                hoverPreview.classList.remove('visible');
+                hoverPreview.innerHTML = '';
+                clearTimeout(hoverTimer);
+            };
+
+            card.addEventListener('mouseenter', () => {
+                clearTimeout(hoverTimer);
+                hoverTimer = setTimeout(showPreview, 1000);
+            });
+
+            card.addEventListener('mouseleave', () => {
+                clearTimeout(hoverTimer);
+                hidePreview();
+            });
+        }
+
         card.addEventListener('click', (event) => {
             const actionTarget = event.target.closest('[data-action]');
             if (actionTarget) {
@@ -172,8 +231,8 @@ function renderNotes() {
                 return;
             }
 
-            const noteId = card.dataset.id;
-            currentSelectedNoteId = noteId;
+            const activeNoteId = card.dataset.id;
+            currentSelectedNoteId = activeNoteId;
             renderNotes();
         });
 
@@ -570,6 +629,12 @@ importXmlInput.addEventListener('change', async (event) => {
     reader.readAsText(file);
     importXmlInput.value = '';
 });
+
+if (layoutToggleBtn) {
+    layoutToggleBtn.addEventListener('click', () => {
+        setNotesLayout(noteLayout === 'grid' ? 'list' : 'grid');
+    });
+}
 
 document.querySelectorAll('.color-picker .swatch').forEach(button => {
     button.addEventListener('click', () => {

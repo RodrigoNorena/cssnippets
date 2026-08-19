@@ -4,16 +4,47 @@
     <category name="Dispatching" />
     <category name="Update" />
     <category name="Cloud Task" />
+    <category name="Watch" />
+    <category name="Closing" />
   </categories>
+  <note id="bab01127-cb31-4c7c-a043-746a328dfc2d" title="Thanks1" category="Closing" color="#fff4a3" createdAt="2026-08-18T09:51:45.390Z" updatedAt="2026-08-18T09:51:58.667Z">
+    <content><![CDATA[<p>Dear Customer,</p>
+<p>Thank you for your confirmation, we will now proceed to close this ticket according to your indications.</p>
+<p>Kind regards,</p>
+<p>Bizagi Support Team</p>]]></content>
+  </note>
+  <note id="adef84a4-c661-47cc-8619-55b17d7cbe52" title="ExecuteDbScriptASAP" category="Cloud Task" color="#fff4a3" createdAt="2026-08-18T06:39:36.460Z" updatedAt="2026-08-19T11:28:09.568Z">
+    <content><![CDATA[<p>Hola Compa&ntilde;eros,</p>
+<p>Por favor su ayuda con esta tarea:</p>
+<p>- Cliente: Old Mutual<br>- Proyecto: CIT<br>- Ambiente(s): Prod<br>- Actividad(es): &nbsp;Ejecutar el script adjunto.<br>- Fecha y Hora de Inicio: ASAP<br>- Duraci&oacute;n estimada: 10 min<br>- Time Zone: CEST (UTC+2)<br>- Notificar al cliente: Yes</p>
+<p>Saludos.</p>]]></content>
+  </note>
+  <note id="6784a5b3-6d7c-4129-9ba6-24433ba55363" title="FixSch2AsyncTasks" category="Cloud Task" color="#fff4a3" createdAt="2026-08-17T11:26:38.371Z" updatedAt="2026-08-17T11:26:38.371Z">
+    <content><![CDATA[<p>Hola Compa&ntilde;eros,</p>
+<p>Por favor su ayuda con esta tarea:</p>
+<p>- Cliente: Old Mutual<br>- Proyecto: CIT<br>- Ambiente(s): Test<br>- Actividad(es): &nbsp;Ejecutar el siguiente script Scheduler2_FixStuckAsyncTasks.sql (https://bizagi-my.sharepoint.com/:u:/p/rodrigo_norena/IQDOxaKnJki2RKyDEBn03nHbAeiERccUaISG9EPUK5VWJUc?e=bCOCqz)<br>- Fecha y Hora de Inicio: ASAP<br>- Duraci&oacute;n estimada: 10 min<br>- Time Zone: CEST (UTC+2)<br>- Notificar al cliente: No</p>
+<p>Saludos.</p>]]></content>
+  </note>
+  <note id="29a5cb7e-a733-4e48-b6cb-fdb94e16e605" title="ReAssign" category="Dispatching" color="#d7f7d7" createdAt="2026-08-17T10:13:43.139Z" updatedAt="2026-08-17T11:21:18.486Z">
+    <content><![CDATA[<p>Hola Compa&ntilde;ero,</p>
+<p>Por favor tu ayuda con este caso.</p>
+<p>Saludos.</p>]]></content>
+  </note>
+  <note id="86aa7e39-7b5c-44eb-8527-1b8f14fceff9" title="Receive Ticket EN" category="Dispatching" color="#fff4a3" createdAt="2026-08-17T07:30:20.161Z" updatedAt="2026-08-17T07:30:20.161Z">
+    <content><![CDATA[<p>Dear customer,&nbsp;</p>
+<p>We have assigned this case to one of our Support engineers, and they will be looking at it as soon as possible or contacting you if any additional information is needed.&nbsp;</p>
+<p>Kind regards,</p>
+<p>Bizagi Support Team</p>]]></content>
+  </note>
   <note id="1dc7466f-edca-4a48-9ad9-9f0424cf2272" title="Recibir Ticket ES" category="Dispatching" color="#fff4a3" createdAt="2026-08-17T07:31:28.267Z" updatedAt="2026-08-17T07:31:28.267Z">
     <content><![CDATA[<p>Estimado Cliente,&nbsp;</p>
 <p>Hemos asignado este caso a uno de nuestros agentes de soporte para su revision y soluci&oacute;n. Le estaremos contactando en caso de que requiramos o o tengamos alguna informaci&oacute;n para compartir.</p>
 <p>Cordialmente,&nbsp;</p>
 <p>Equipo de Soporte de Bizagi</p>]]></content>
   </note>
-  <note id="86aa7e39-7b5c-44eb-8527-1b8f14fceff9" title="Receive Ticket EN" category="Dispatching" color="#fff4a3" createdAt="2026-08-17T07:30:20.161Z" updatedAt="2026-08-17T07:30:20.161Z">
+  <note id="3ba7d4c5-3d14-4905-8f92-083e762e220b" title="Severity Change" category="Watch" color="#ffd7e6" createdAt="2026-08-17T07:54:39.410Z" updatedAt="2026-08-17T07:54:39.410Z">
     <content><![CDATA[<p>Dear customer,&nbsp;</p>
-<p>We have assigned this case to one of our Support engineers, and they will be looking at it as soon as possible or contacting you if any additional information is needed.&nbsp;</p>
+<p>Our initial assessment indicates that the severity level does not corresponds to the situation described in the ticket . Therefore we have changed the severity level from "Production system down" to "Question about Bizagi".</p>
 <p>Kind regards,</p>
 <p>Bizagi Support Team</p>]]></content>
   </note>
