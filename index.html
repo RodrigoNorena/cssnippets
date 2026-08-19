@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editor TinyMCE con notas reutilizables</title>
+    <title>CS Snippets</title>
     
     <script src="./tinymce_8.6.0/tinymce/js/tinymce/tinymce.min.js"></script>
     <link rel="stylesheet" href="styles.css">
@@ -13,7 +13,7 @@
 
 <div class="layout">
     <div class="editor-panel">
-        <h2>Editor TinyMCE + Imágenes Base64</h2>
+        <h2>CS Snippets</h2>
 
         <div class="toolbar-custom">
             <button onclick="copiarHTML()">Copiar HTML</button>
@@ -119,21 +119,11 @@
                     <li>Haz clic en <strong>"Guardar del editor"</strong></li>
                 </ol>
 
-                <p><strong>Editar una nota:</strong></p>
+                <p><strong>Acciones de una nota:</strong></p>
                 <ol>
-                    <li>Haz clic en <strong>"Editar"</strong> en la tarjeta de la nota</li>
-                    <li>El botón cambiará a <strong>"✎ Actualizar nota"</strong> (verde)</li>
-                    <li>Modifica el título, categoría o color según necesites</li>
-                    <li>Edita el contenido en el editor TinyMCE</li>
-                    <li>Haz clic en <strong>"Actualizar nota"</strong></li>
-                    <li>Haz clic en <strong>"Limpiar"</strong> cuando termines</li>
-                </ol>
-
-                <p><strong>Cargar una nota en el editor:</strong></p>
-                <ol>
-                    <li>Haz clic en <strong>"Abrir"</strong> en la tarjeta de la nota</li>
-                    <li>El contenido aparecerá en el editor TinyMCE</li>
-                    <li>Ahora puedes editarlo y guardar cambios</li>
+                    <li>Haz clic en <strong>"Cargar nota"</strong> para abrirla en el editor y poder actualizarla</li>
+                    <li>Haz clic en <strong>"Copiar nota con formato"</strong> para copiarla como al usar Ctrl+C en el editor</li>
+                    <li>Haz clic en <strong>"Borrar"</strong> para eliminarla</li>
                 </ol>
 
                 <p><strong>Eliminar una nota:</strong></p>

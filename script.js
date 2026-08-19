@@ -138,9 +138,9 @@ function renderNotes() {
                 <div class="note-card-header">
                     <span class="note-category">${escapeHtml(note.category || 'General')}</span>
                     <div class="note-actions">
-                        <button type="button" data-action="load" data-id="${note.id}">&#x1F441</button>
-                        <button type="button" data-action="edit" data-id="${note.id}">&#x270F</button>
-                        <button type="button" data-action="delete" data-id="${note.id}">&#x274C</button>
+                        <button type="button" data-action="load" data-id="${note.id}" aria-label="Cargar nota" title="Cargar nota">&#x1F441;</button>
+                        <button type="button" data-action="copy" data-id="${note.id}" aria-label="Copiar nota con formato" title="Copiar nota con formato">&#x1F4CB;</button>
+                        <button type="button" data-action="delete" data-id="${note.id}" aria-label="Eliminar nota" title="Eliminar nota">&#x274C;</button>
                     </div>
                 </div>
 
@@ -163,8 +163,8 @@ function renderNotes() {
                 if (action === 'load') {
                     loadNoteIntoEditor(noteId);
                 }
-                if (action === 'edit') {
-                    editNoteFromList(noteId);
+                if (action === 'copy') {
+                    copyNoteFormatted(noteId);
                 }
                 if (action === 'delete') {
                     deleteNote(noteId);
@@ -464,13 +464,6 @@ function deleteNote(noteId) {
     mostrarEstado('Nota eliminada');
 }
 
-function editNoteFromList(noteId) {
-    const targetNote = notes.find(note => note.id === noteId);
-    if (!targetNote) return;
-    populateFormFromNote(targetNote);
-    mostrarEstado('Editando nota');
-}
-
 function loadNoteIntoEditor(noteId) {
     const targetNote = notes.find(note => note.id === noteId);
     if (!targetNote) return;
@@ -479,6 +472,46 @@ function loadNoteIntoEditor(noteId) {
     currentSelectedNoteId = targetNote.id;
     populateFormFromNote(targetNote);
     mostrarEstado('Nota cargada en el editor');
+}
+
+async function copyNoteFormatted(noteId) {
+    const targetNote = notes.find(note => note.id === noteId);
+    if (!targetNote) return;
+
+    const htmlContent = targetNote.content || '';
+    const temporaryContainer = document.createElement('div');
+    temporaryContainer.innerHTML = htmlContent;
+    temporaryContainer.style.position = 'fixed';
+    temporaryContainer.style.left = '-9999px';
+    temporaryContainer.style.top = '0';
+    document.body.appendChild(temporaryContainer);
+
+    const plainText = temporaryContainer.innerText || temporaryContainer.textContent || '';
+
+    try {
+        if (navigator.clipboard && window.ClipboardItem) {
+            const clipboardData = {
+                'text/html': new Blob([htmlContent], { type: 'text/html' }),
+                'text/plain': new Blob([plainText], { type: 'text/plain' })
+            };
+            await navigator.clipboard.write([new ClipboardItem(clipboardData)]);
+        } else {
+            const selection = window.getSelection();
+            const range = document.createRange();
+            range.selectNodeContents(temporaryContainer);
+            selection.removeAllRanges();
+            selection.addRange(range);
+            if (!document.execCommand('copy')) {
+                throw new Error('No se pudo copiar el contenido');
+            }
+            selection.removeAllRanges();
+        }
+        mostrarEstado('Nota copiada con formato');
+    } catch (error) {
+        mostrarEstado('No se pudo copiar la nota');
+    } finally {
+        temporaryContainer.remove();
+    }
 }
 
 function cargarNotaAlEditor() {
