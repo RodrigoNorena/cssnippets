@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<notes>
+  <categories>
+    <category name="Dispatching" />
+    <category name="Update" />
+    <category name="Cloud Task" />
+  </categories>
+  <note id="1dc7466f-edca-4a48-9ad9-9f0424cf2272" title="Recibir Ticket ES" category="Dispatching" color="#fff4a3" createdAt="2026-08-17T07:31:28.267Z" updatedAt="2026-08-17T07:31:28.267Z">
+    <content><![CDATA[<p>Estimado Cliente,&nbsp;</p>
+<p>Hemos asignado este caso a uno de nuestros agentes de soporte para su revision y soluci&oacute;n. Le estaremos contactando en caso de que requiramos o o tengamos alguna informaci&oacute;n para compartir.</p>
+<p>Cordialmente,&nbsp;</p>
+<p>Equipo de Soporte de Bizagi</p>]]></content>
+  </note>
+  <note id="86aa7e39-7b5c-44eb-8527-1b8f14fceff9" title="Receive Ticket EN" category="Dispatching" color="#fff4a3" createdAt="2026-08-17T07:30:20.161Z" updatedAt="2026-08-17T07:30:20.161Z">
+    <content><![CDATA[<p>Dear customer,&nbsp;</p>
+<p>We have assigned this case to one of our Support engineers, and they will be looking at it as soon as possible or contacting you if any additional information is needed.&nbsp;</p>
+<p>Kind regards,</p>
+<p>Bizagi Support Team</p>]]></content>
+  </note>
+</notes>

@@ -1,0 +1,1332 @@
+<!DOCTYPE html>
+
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Editor TinyMCE con notas reutilizables</title>
+
+<script src="./tinymce_8.6.0/tinymce/js/tinymce/tinymce.min.js"></script>
+
+<style>
+:root {
+    --bg: #f5f6fa;
+    --panel: #ffffff;
+    --panel-soft: #eef3ff;
+    --border: #dfe4ee;
+    --text: #1d2433;
+    --muted: #5d677a;
+    --primary: #4067ff;
+    --primary-soft: #eaf0ff;
+    --note-yellow: #fff4a3;
+    --note-pink: #ffd7e6;
+    --note-green: #d7f7d7;
+    --note-blue: #d6e8ff;
+    --note-purple: #eadbff;
+    --shadow: 0 12px 30px rgba(20, 29, 52, 0.08);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+}
+
+body {
+    min-height: 100vh;
+}
+
+.layout {
+    display: flex;
+    gap: 20px;
+    padding: 20px;
+    max-width: 1700px;
+    margin: 0 auto;
+    align-items: flex-start;
+}
+
+.editor-panel {
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+.notes-panel {
+    width: 400px;
+    max-width: 35vw;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    box-shadow: var(--shadow);
+    padding: 16px;
+    transition: width 0.25s ease, opacity 0.25s ease, transform 0.25s ease;
+}
+
+.notes-panel.collapsed {
+    width: 72px;
+    padding: 12px 10px;
+}
+
+.notes-panel.collapsed .panel-body,
+.notes-panel.collapsed .filter-bar,
+.notes-panel.collapsed .note-creator,
+.notes-panel.collapsed .notes-grid,
+.notes-panel.collapsed .panel-header h3 {
+    display: none;
+}
+
+.panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    gap: 12px;
+}
+
+.panel-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+.toolbar-custom {
+    margin-bottom: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+button {
+    padding: 9px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: #fff;
+    color: var(--text);
+    cursor: pointer;
+    font-weight: 600;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 18px rgba(25, 38, 63, 0.08);
+}
+
+button.primary {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+}
+
+button.secondary {
+    background: var(--panel-soft);
+}
+
+button.ghost {
+    background: transparent;
+}
+
+button.small {
+    padding: 6px 8px;
+    font-size: 0.8rem;
+}
+
+#status {
+    margin-top: 10px;
+    color: green;
+    font-weight: bold;
+    min-height: 20px;
+}
+
+.note-creator {
+    display: grid;
+    gap: 10px;
+    padding: 12px;
+    background: #f8f9fd;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    margin-bottom: 12px;
+}
+
+.note-creator input,
+.note-creator select,
+.note-creator textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: #fff;
+    font: inherit;
+    color: var(--text);
+}
+
+.note-creator textarea {
+    resize: vertical;
+    min-height: 92px;
+}
+
+.color-picker {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.swatch {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    padding: 0;
+    margin: 0;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.05);
+}
+
+.swatch.active {
+    border-color: var(--text);
+    transform: scale(1.08);
+}
+
+.creator-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.filter-btn {
+    background: #f3f5fb;
+}
+
+.filter-btn.active {
+    background: var(--primary-soft);
+    color: var(--primary);
+    border-color: #bed0ff;
+}
+
+.notes-grid {
+    display: block;
+    columns: 2 160px;
+    column-gap: 12px;
+}
+
+.note-card {
+    --note-color: var(--note-yellow);
+    display: inline-block;
+    width: 100%;
+    background: var(--note-color);
+    border: 1px solid rgba(0,0,0,0.05);
+    border-radius: 16px;
+    padding: 12px 12px 10px;
+    margin: 0 0 12px;
+    break-inside: avoid;
+    box-shadow: 0 8px 14px rgba(34, 42, 60, 0.06);
+    cursor: pointer;
+    position: relative;
+}
+
+.note-card.drag-over {
+    outline: 2px dashed var(--primary);
+}
+
+.note-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.note-category {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(255,255,255,0.35);
+    border-radius: 999px;
+    padding: 5px 8px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+
+.note-actions {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.note-actions button {
+    margin: 0;
+    padding: 5px 7px;
+    font-size: 0.72rem;
+    border-radius: 8px;
+}
+
+.note-card h4 {
+    margin: 0 0 8px;
+    font-size: 1rem;
+    word-break: break-word;
+}
+
+.note-preview {
+    color: rgba(29, 36, 51, 0.8);
+    line-height: 1.45;
+    font-size: 0.9rem;
+    word-break: break-word;
+    min-height: 40px;
+}
+
+.note-preview p {
+    margin: 0;
+}
+
+.note-card-footer {
+    margin-top: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.72rem;
+    color: rgba(29, 36, 51, 0.7);
+}
+
+.empty-state {
+    background: #f5f7ff;
+    border: 1px dashed #ccd5ef;
+    border-radius: 14px;
+    padding: 18px;
+    color: var(--muted);
+    text-align: center;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.2s ease;
+}
+
+.modal.hidden {
+    display: none !important;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal-content {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(20, 29, 52, 0.15);
+    max-width: 700px;
+    max-height: 80vh;
+    overflow-y: auto;
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: white;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: var(--text);
+}
+
+.modal-close {
+    background: transparent;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--muted);
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.modal-close:hover {
+    background: #f3f5fb;
+    color: var(--text);
+}
+
+.modal-body {
+    padding: 24px;
+}
+
+.help-section {
+    margin-bottom: 24px;
+}
+
+.help-section:last-child {
+    margin-bottom: 0;
+}
+
+.help-section h3 {
+    margin: 0 0 12px 0;
+    font-size: 1.1rem;
+    color: var(--primary);
+    border-bottom: 2px solid var(--primary-soft);
+    padding-bottom: 8px;
+}
+
+.help-section p {
+    margin: 0 0 8px 0;
+    color: var(--text);
+    line-height: 1.5;
+}
+
+.help-section ul,
+.help-section ol {
+    margin: 8px 0 0 20px;
+    padding: 0;
+    color: var(--text);
+    line-height: 1.6;
+}
+
+.help-section li {
+    margin-bottom: 6px;
+}
+
+.help-section strong {
+    color: var(--primary);
+    font-weight: 700;
+}
+
+@media (max-width: 980px) {
+    .layout {
+        flex-direction: column;
+    }
+
+    .notes-panel {
+        width: 100%;
+        max-width: none;
+    }
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="layout">
+    <div class="editor-panel">
+        <h2>Editor TinyMCE + Imágenes Base64</h2>
+
+        <div class="toolbar-custom">
+            <button onclick="copiarHTML()">Copiar HTML</button>
+            <button onclick="descargarHTML()">Descargar HTML</button>
+            <button class="secondary" onclick="guardarNotaDesdeEditor()">Guardar como nota</button>
+            <button class="secondary" onclick="toggleSidebar()">Notas</button>
+            <button class="secondary" onclick="exportarNotasXml()">Exportar XML</button>
+            <button class="secondary" onclick="importarNotasXml()">Importar XML</button>
+            <button class="secondary" onclick="openHelpModal()" title="Ayuda" style="margin-left: auto;">❓</button>
+        </div>
+
+        <textarea id="editor"></textarea>
+        <div id="status"></div>
+    </div>
+
+    <aside id="notesPanel" class="notes-panel">
+        <div class="panel-header">
+            <h3>Notas</h3>
+            <button class="small" onclick="toggleSidebar()" aria-label="Colapsar panel">☰</button>
+        </div>
+
+        <div class="panel-body">
+            <div class="note-creator">
+                <input id="noteTitle" type="text" placeholder="Título de la nota" />
+
+                <div style="display: flex; gap: 8px;">
+                    <select id="noteCategory" style="flex: 1;"></select>
+                    <button id="addCategoryBtn" class="small" type="button" title="Agregar categoría">+</button>
+                </div>
+
+                <div id="newCategoryContainer" style="display: none; flex-direction: column; gap: 8px;">
+                    <input id="newCategoryInput" type="text" placeholder="Nombre de la categoría" style="width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; background: #fff; font: inherit; color: var(--text);" />
+                    <div style="display: flex; gap: 8px;">
+                        <button id="saveCategoryBtn" class="primary small" type="button">Guardar</button>
+                        <button id="cancelCategoryBtn" class="small ghost" type="button">Cancelar</button>
+                    </div>
+                </div>
+
+                <div class="color-picker" id="colorPicker">
+                    <button class="swatch active" data-color="#fff4a3" style="background:#fff4a3" type="button" title="Amarillo"></button>
+                    <button class="swatch" data-color="#ffd7e6" style="background:#ffd7e6" type="button" title="Rosa"></button>
+                    <button class="swatch" data-color="#d7f7d7" style="background:#d7f7d7" type="button" title="Verde"></button>
+                    <button class="swatch" data-color="#d6e8ff" style="background:#d6e8ff" type="button" title="Azul"></button>
+                    <button class="swatch" data-color="#eadbff" style="background:#eadbff" type="button" title="Morado"></button>
+                </div>
+
+                <div class="creator-actions">
+                    <button id="saveNoteBtn" class="primary" type="button" onclick="guardarNotaDesdeEditor()">Guardar del editor</button>
+                    <button class="ghost" type="button" onclick="cargarNotaAlEditor()">Cargar al editor</button>
+                    <button id="clearNoteBtn" class="ghost" type="button" onclick="limpiarFormulario()" style="display:none;">Limpiar</button>
+                </div>
+            </div>
+
+            <div class="filter-bar" id="filters"></div>
+            <div id="notesContainer" class="notes-grid"></div>
+        </div>
+    </aside>
+</div>
+
+<input id="importXmlInput" type="file" accept=".xml" class="hidden" />
+
+<!-- Modal de Ayuda -->
+<div id="helpModal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Ayuda de Uso</h2>
+            <button class="modal-close" onclick="closeHelpModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="help-section">
+                <h3>📝 Editor Principal (TinyMCE)</h3>
+                <p>Editor de texto enriquecido para crear y editar contenido con formatos como:</p>
+                <ul>
+                    <li><strong>Estilos:</strong> Negrita, cursiva, subrayado</li>
+                    <li><strong>Listas:</strong> Numeradas y sin numerar</li>
+                    <li><strong>Tablas:</strong> Inserta y edita tablas</li>
+                    <li><strong>Imágenes:</strong> Se guardan en Base64 (dentro del documento)</li>
+                    <li><strong>Vínculos:</strong> Agrega enlaces a textos</li>
+                    <li><strong>Código:</strong> Visualiza el código fuente HTML</li>
+                </ul>
+            </div>
+
+            <div class="help-section">
+                <h3>💾 Botones de Toolbar Principal</h3>
+                <ul>
+                    <li><strong>Copiar HTML:</strong> Copia el contenido HTML actual al portapapeles</li>
+                    <li><strong>Descargar HTML:</strong> Descarga el contenido como archivo .html</li>
+                    <li><strong>Guardar como nota:</strong> Guarda el contenido actual en una nota reutilizable</li>
+                    <li><strong>Notas:</strong> Abre/cierra el panel lateral de notas</li>
+                    <li><strong>Exportar XML:</strong> Descarga todas las notas en formato XML</li>
+                    <li><strong>Importar XML:</strong> Carga notas de un archivo XML anteriormente exportado</li>
+                </ul>
+            </div>
+
+            <div class="help-section">
+                <h3>📌 Panel Lateral (Notas Reutilizables)</h3>
+                <p><strong>Crear una nota:</strong></p>
+                <ol>
+                    <li>Escribe el contenido en el editor TinyMCE</li>
+                    <li>Completa el <strong>Título</strong> en el panel lateral</li>
+                    <li>Selecciona una <strong>Categoría</strong></li>
+                    <li>Elige un <strong>Color</strong> para la tarjeta</li>
+                    <li>Haz clic en <strong>"Guardar del editor"</strong></li>
+                </ol>
+
+                <p><strong>Editar una nota:</strong></p>
+                <ol>
+                    <li>Haz clic en <strong>"Editar"</strong> en la tarjeta de la nota</li>
+                    <li>El botón cambiará a <strong>"✎ Actualizar nota"</strong> (verde)</li>
+                    <li>Modifica el título, categoría o color según necesites</li>
+                    <li>Edita el contenido en el editor TinyMCE</li>
+                    <li>Haz clic en <strong>"Actualizar nota"</strong></li>
+                    <li>Haz clic en <strong>"Limpiar"</strong> cuando termines</li>
+                </ol>
+
+                <p><strong>Cargar una nota en el editor:</strong></p>
+                <ol>
+                    <li>Haz clic en <strong>"Abrir"</strong> en la tarjeta de la nota</li>
+                    <li>El contenido aparecerá en el editor TinyMCE</li>
+                    <li>Ahora puedes editarlo y guardar cambios</li>
+                </ol>
+
+                <p><strong>Eliminar una nota:</strong></p>
+                <ol>
+                    <li>Haz clic en <strong>"Borrar"</strong> en la tarjeta de la nota</li>
+                    <li>La nota se eliminará inmediatamente</li>
+                </ol>
+            </div>
+
+            <div class="help-section">
+                <h3>🏷️ Categorías Dinámicas</h3>
+                <p>Puedes crear tus propias categorías:</p>
+                <ol>
+                    <li>Haz clic en el botón <strong>"+"</strong> junto al selector de categoría</li>
+                    <li>Escribe el nombre de la nueva categoría</li>
+                    <li>Presiona <strong>Enter</strong> o haz clic en <strong>"Guardar"</strong></li>
+                    <li>Puedes usar esta categoría en tus notas</li>
+                </ol>
+            </div>
+
+            <div class="help-section">
+                <h3>🎨 Colores de Notas</h3>
+                <p>Cada nota puede tener un color diferente para organizarlas visualmente:</p>
+                <ul>
+                    <li>🟨 Amarillo</li>
+                    <li>🟩 Verde</li>
+                    <li>🟦 Azul</li>
+                    <li>🟥 Rosa/Rojo</li>
+                    <li>🟪 Morado</li>
+                </ul>
+            </div>
+
+            <div class="help-section">
+                <h3>💾 Persistencia de Datos</h3>
+                <p>Las notas se guardan automáticamente en <strong>localStorage</strong> del navegador:</p>
+                <ul>
+                    <li>Al cerrar y abrir el navegador, tus notas se mantienen</li>
+                    <li>Para hacer una copia de seguridad, exporta a XML</li>
+                    <li>Para restaurar notas, importa el archivo XML</li>
+                </ul>
+            </div>
+
+            <div class="help-section">
+                <h3>📊 Filtrar por Categoría</h3>
+                <p>Los botones de filtro en el panel te permiten:</p>
+                <ul>
+                    <li>Ver todas las notas (botón "Todas")</li>
+                    <li>Ver solo notas de una categoría específica</li>
+                    <li>Reordenar notas arrastrándolas entre ellas</li>
+                </ul>
+            </div>
+
+            <div class="help-section">
+                <h3>💡 Consejos</h3>
+                <ul>
+                    <li>Usa diferentes colores para categorías visuales</li>
+                    <li>Las imágenes insertadas en el editor se guardan en Base64</li>
+                    <li>Exporta regularmente tus notas como backup</li>
+                    <li>Puedes editar notas rápidamente desde las tarjetas</li>
+                    <li>El contenido del editor se mantiene mientras trabajas</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'tinyhtml-notes-v1';
+const CATEGORIES_KEY = 'tinyhtml-categories-v1';
+const XML_PATH = './notes.xml';
+const noteColors = ['#fff4a3', '#ffd7e6', '#d7f7d7', '#d6e8ff', '#eadbff'];
+const DEFAULT_CATEGORIES = ['Dispatching', 'Update', 'Cloud Task'];
+
+let notes = [];
+let categories = [];
+let currentFilter = 'all';
+let currentSelectedNoteId = null;
+let selectedColor = '#fff4a3';
+let draggedNoteId = null;
+let isEditingMode = false;
+let previewTextLength = 150;
+
+const noteTitle = document.getElementById('noteTitle');
+const noteCategory = document.getElementById('noteCategory');
+const notesContainer = document.getElementById('notesContainer');
+const filtersContainer = document.getElementById('filters');
+const notesPanel = document.getElementById('notesPanel');
+const importXmlInput = document.getElementById('importXmlInput');
+const addCategoryBtn = document.getElementById('addCategoryBtn');
+const newCategoryContainer = document.getElementById('newCategoryContainer');
+const newCategoryInput = document.getElementById('newCategoryInput');
+const saveCategoryBtn = document.getElementById('saveCategoryBtn');
+const cancelCategoryBtn = document.getElementById('cancelCategoryBtn');
+const saveNoteBtn = document.getElementById('saveNoteBtn');
+const clearNoteBtn = document.getElementById('clearNoteBtn');
+
+function mostrarEstado(texto) {
+    const status = document.getElementById('status');
+    status.textContent = texto;
+    clearTimeout(mostrarEstado.timeoutId);
+    mostrarEstado.timeoutId = setTimeout(() => {
+        status.textContent = '';
+    }, 3000);
+}
+
+function escapeHtml(value) {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+function stripHtml(html) {
+    const temp = document.createElement('div');
+    temp.innerHTML = html || '';
+    return (temp.textContent || temp.innerText || '').replace(/\s+/g, ' ').trim();
+}
+
+function formatDate(timestamp) {
+    if (!timestamp) return 'Sin fecha';
+    const date = new Date(timestamp);
+    return isNaN(date.getTime()) ? 'Sin fecha' : date.toLocaleString('es-ES', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
+function createId() {
+    if (window.crypto && crypto.randomUUID) {
+        return crypto.randomUUID();
+    }
+    return 'note-' + Date.now() + '-' + Math.random().toString(16).slice(2);
+}
+
+function getSafeNoteContent(content) {
+    if (content && typeof content === 'string') {
+        return content.trim();
+    }
+    return '';
+}
+
+function getCategoriesFromNotes() {
+    const categoriesFromNotes = new Set(notes.map(note => note.category || 'General'));
+    return ['all', ...Array.from(categoriesFromNotes)];
+}
+
+function saveCategoriesToStorage() {
+    localStorage.setItem(CATEGORIES_KEY, JSON.stringify(categories));
+}
+
+function readCategoriesFromStorage() {
+    try {
+        const raw = localStorage.getItem(CATEGORIES_KEY);
+        return raw ? JSON.parse(raw) : DEFAULT_CATEGORIES.slice();
+    } catch (error) {
+        return DEFAULT_CATEGORIES.slice();
+    }
+}
+
+function renderCategorySelect() {
+    noteCategory.innerHTML = categories.map(cat => `<option value="${escapeHtml(cat)}">${escapeHtml(cat)}</option>`).join('');
+}
+
+function renderFilters() {
+    const filterCategories = getCategoriesFromNotes();
+    const buttons = filterCategories.map(category => {
+        const label = category === 'all' ? 'Todas' : category;
+        const activeClass = currentFilter === category ? 'active' : '';
+        return `<button class="filter-btn ${activeClass}" data-filter="${category}" type="button">${escapeHtml(label)}</button>`;
+    }).join('');
+
+    filtersContainer.innerHTML = buttons;
+    filtersContainer.querySelectorAll('.filter-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            currentFilter = button.dataset.filter;
+            renderFilters();
+            renderNotes();
+        });
+    });
+}
+
+function renderNotes() {
+    const filteredNotes = currentFilter === 'all'
+        ? notes
+        : notes.filter(note => (note.category || 'General') === currentFilter);
+
+    if (!filteredNotes.length) {
+        notesContainer.innerHTML = '<div class="empty-state">No hay notas para esta categoría.</div>';
+        return;
+    }
+
+    notesContainer.innerHTML = filteredNotes.map(note => {
+        const noteTitleText = note.title ? escapeHtml(note.title) : 'Sin título';
+        const previewText = stripHtml(note.content || '');
+        const snippet = previewText ? (previewText.length > previewTextLength ? previewText.slice(0, previewTextLength) + '...' : previewText) : 'Sin contenido';
+        const isSelected = currentSelectedNoteId === note.id ? 'style="outline: 2px solid rgba(64, 103, 255, 0.5);"' : '';
+
+        return `
+            <article class="note-card" data-id="${note.id}" draggable="true" style="--note-color: ${note.color || '#fff4a3'};" ${isSelected}>
+                <div class="note-card-header">
+                    <span class="note-category">${escapeHtml(note.category || 'General')}</span>
+                    <div class="note-actions">
+                        <button type="button" data-action="load" data-id="${note.id}">&#x1F441</button>
+                        <button type="button" data-action="edit" data-id="${note.id}">&#x270F</button>
+                        <button type="button" data-action="delete" data-id="${note.id}">&#x274C</button>
+                    </div>
+                </div>
+
+                <h4>${noteTitleText}</h4>
+                <div class="note-preview">${escapeHtml(snippet)}</div>
+                <div class="note-card-footer">
+                    <span>${formatDate(note.updatedAt || note.createdAt)}</span>
+                </div>
+            </article>
+        `;
+    }).join('');
+
+    notesContainer.querySelectorAll('.note-card').forEach(card => {
+        card.addEventListener('click', (event) => {
+            const actionTarget = event.target.closest('[data-action]');
+            if (actionTarget) {
+                const action = actionTarget.dataset.action;
+                const noteId = actionTarget.dataset.id;
+
+                if (action === 'load') {
+                    loadNoteIntoEditor(noteId);
+                }
+                if (action === 'edit') {
+                    editNoteFromList(noteId);
+                }
+                if (action === 'delete') {
+                    deleteNote(noteId);
+                }
+                return;
+            }
+
+            const noteId = card.dataset.id;
+            currentSelectedNoteId = noteId;
+            renderNotes();
+        });
+
+        card.addEventListener('dragstart', (event) => {
+            draggedNoteId = card.dataset.id;
+            event.dataTransfer.effectAllowed = 'move';
+            card.classList.add('dragging');
+        });
+
+        card.addEventListener('dragend', () => {
+            draggedNoteId = null;
+            card.classList.remove('dragging');
+            notesContainer.querySelectorAll('.note-card').forEach(el => el.classList.remove('drag-over'));
+        });
+
+        card.addEventListener('dragover', (event) => {
+            event.preventDefault();
+            card.classList.add('drag-over');
+        });
+
+        card.addEventListener('dragleave', () => {
+            card.classList.remove('drag-over');
+        });
+
+        card.addEventListener('drop', (event) => {
+            event.preventDefault();
+            const targetId = card.dataset.id;
+            reorderNotes(draggedNoteId, targetId);
+            card.classList.remove('drag-over');
+        });
+    });
+}
+
+function reorderNotes(sourceId, targetId) {
+    if (!sourceId || !targetId || sourceId === targetId) {
+        return;
+    }
+
+    const sourceIndex = notes.findIndex(note => note.id === sourceId);
+    const targetIndex = notes.findIndex(note => note.id === targetId);
+
+    if (sourceIndex === -1 || targetIndex === -1) return;
+
+    const [movedNote] = notes.splice(sourceIndex, 1);
+    notes.splice(targetIndex, 0, movedNote);
+    saveNotesToStorage();
+    renderNotes();
+}
+
+function saveNotesToStorage() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
+}
+
+function readNotesFromStorage() {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        return raw ? JSON.parse(raw) : [];
+    } catch (error) {
+        return [];
+    }
+}
+
+function ensureExampleNotes() {
+    if (notes.length > 0) return;
+
+    notes = [
+        {
+            id: createId(),
+            title: 'Ideas del proyecto',
+            category: 'Dispatching',
+            color: '#fff4a3',
+            content: '<p>Crear un panel lateral para notas rápidas con categorías.</p><ul><li>Guardar contenido HTML</li><li>Reutilizar notas</li></ul>',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        },
+        {
+            id: createId(),
+            title: 'Recordatorio',
+            category: 'Cloud Task',
+            color: '#d7f7d7',
+            content: '<p>Revisar propuestas de diseño y exportar notas a XML.</p>',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        }
+    ];
+    saveNotesToStorage();
+}
+
+function loadCategoriesFromXml(xmlText) {
+    if (!xmlText || !xmlText.trim()) {
+        return DEFAULT_CATEGORIES.slice();
+    }
+
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(xmlText, 'application/xml');
+    const categoryNodes = Array.from(xmlDoc.querySelectorAll('categories > category'));
+
+    if (categoryNodes.length === 0) {
+        return DEFAULT_CATEGORIES.slice();
+    }
+
+    return categoryNodes.map(node => node.getAttribute('name')).filter(name => name);
+}
+
+function loadNotesFromXml(xmlText) {
+    if (!xmlText || !xmlText.trim()) {
+        return [];
+    }
+
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(xmlText, 'application/xml');
+    const xmlNotes = Array.from(xmlDoc.querySelectorAll('note'));
+
+    return xmlNotes.map(noteNode => ({
+        id: noteNode.getAttribute('id') || createId(),
+        title: noteNode.getAttribute('title') || 'Sin título',
+        category: noteNode.getAttribute('category') || 'General',
+        color: noteNode.getAttribute('color') || '#fff4a3',
+        content: noteNode.querySelector('content') ? noteNode.querySelector('content').textContent : '',
+        createdAt: noteNode.getAttribute('createdAt') || new Date().toISOString(),
+        updatedAt: noteNode.getAttribute('updatedAt') || new Date().toISOString()
+    }));
+}
+
+function serializeNotesToXml(items) {
+    const xmlCategories = categories.map(cat => `\n    <category name="${escapeXmlAttribute(cat)}" />`).join('');
+
+    const xmlNotes = items.map(note => {
+        const content = note.content || '';
+        const safeContent = content.replace(/]]>/g, ']]]]><![CDATA[>');
+
+        return `
+  <note id="${escapeXmlAttribute(note.id || createId())}" title="${escapeXmlAttribute(note.title || 'Sin título')}" category="${escapeXmlAttribute(note.category || 'General')}" color="${escapeXmlAttribute(note.color || '#fff4a3')}" createdAt="${escapeXmlAttribute(note.createdAt || new Date().toISOString())}" updatedAt="${escapeXmlAttribute(note.updatedAt || new Date().toISOString())}">
+    <content><![CDATA[${safeContent}]]></content>
+  </note>`;
+    }).join('');
+
+    return '<?xml version="1.0" encoding="UTF-8"?>\n<notes>\n  <categories>' + xmlCategories + '\n  </categories>' + xmlNotes + '\n</notes>';
+}
+
+function escapeXmlAttribute(value) {
+    return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&apos;');
+}
+
+async function loadNotesAtStartup() {
+    const localNotes = readNotesFromStorage();
+    const localCategories = readCategoriesFromStorage();
+    
+    if (localNotes.length) {
+        notes = localNotes;
+        categories = localCategories;
+        renderCategorySelect();
+        renderNotes();
+        renderFilters();
+        return;
+    }
+
+    try {
+        const response = await fetch(XML_PATH, { cache: 'no-store' });
+        if (response.ok) {
+            const xmlText = await response.text();
+            const xmlNotes = loadNotesFromXml(xmlText);
+            const xmlCategories = loadCategoriesFromXml(xmlText);
+            if (xmlNotes.length || xmlCategories.length) {
+                notes = xmlNotes;
+                categories = xmlCategories.length ? xmlCategories : DEFAULT_CATEGORIES.slice();
+                saveNotesToStorage();
+                saveCategoriesToStorage();
+                renderCategorySelect();
+                renderNotes();
+                renderFilters();
+                return;
+            }
+        }
+    } catch (error) {
+        console.log('No se pudo cargar notes.xml, se usará almacenamiento local.', error);
+    }
+
+    categories = DEFAULT_CATEGORIES.slice();
+    ensureExampleNotes();
+    renderCategorySelect();
+    renderNotes();
+    renderFilters();
+}
+
+function populateFormFromNote(note) {
+    if (!note) return;
+    noteTitle.value = note.title || '';
+    noteCategory.value = note.category || 'General';
+    currentSelectedNoteId = note.id;
+    isEditingMode = true;
+
+    const colorButtons = document.querySelectorAll('.swatch');
+    colorButtons.forEach(button => {
+        const isActive = button.dataset.color === (note.color || '#fff4a3');
+        button.classList.toggle('active', isActive);
+    });
+
+    selectedColor = note.color || '#fff4a3';
+    
+    // Cambiar el botón a "Actualizar nota"
+    saveNoteBtn.textContent = 'Actualizar nota';
+    saveNoteBtn.style.backgroundColor = '#48bb78';
+    clearNoteBtn.style.display = 'block';
+    
+    renderNotes();
+}
+
+function limpiarFormulario() {
+    noteTitle.value = '';
+    noteCategory.value = 'General';
+    currentSelectedNoteId = null;
+    isEditingMode = false;
+    selectedColor = '#fff4a3';
+    
+    document.querySelectorAll('.swatch').forEach((btn, idx) => {
+        btn.classList.toggle('active', idx === 0);
+    });
+    
+    saveNoteBtn.textContent = 'Guardar del editor';
+    saveNoteBtn.style.backgroundColor = '';
+    clearNoteBtn.style.display = 'none';
+    renderNotes();
+}
+
+function buildNoteFromForm({ isUpdate = false, id = null } = {}) {
+    const title = noteTitle.value.trim();
+    const category = noteCategory.value || 'General';
+    const content = tinymce.get('editor').getContent({ format: 'html' });
+
+    const baseNote = {
+        id: id || createId(),
+        title: title || 'Sin título',
+        category,
+        color: selectedColor,
+        content: getSafeNoteContent(content),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+    };
+
+    if (isUpdate && id) {
+        const existingNote = notes.find(item => item.id === id);
+        if (existingNote) {
+            baseNote.createdAt = existingNote.createdAt || baseNote.createdAt;
+        }
+    }
+
+    return baseNote;
+}
+
+function guardarNotaManual() {
+    const noteId = currentSelectedNoteId;
+    const isUpdate = Boolean(noteId && notes.some(item => item.id === noteId));
+
+    if (isUpdate) {
+        notes = notes.map(item => item.id === noteId ? buildNoteFromForm({ isUpdate: true, id: noteId }) : item);
+        mostrarEstado('Nota actualizada');
+    } else {
+        const newNote = buildNoteFromForm({ isUpdate: false });
+        notes.unshift(newNote);
+        currentSelectedNoteId = newNote.id;
+        mostrarEstado('Nota guardada');
+    }
+
+    saveNotesToStorage();
+    renderFilters();
+    renderNotes();
+}
+
+function guardarNotaDesdeEditor() {
+    guardarNotaManual();
+}
+
+function deleteNote(noteId) {
+    notes = notes.filter(note => note.id !== noteId);
+    if (currentSelectedNoteId === noteId) {
+        currentSelectedNoteId = null;
+        isEditingMode = false;
+        limpiarFormulario();
+    }
+    saveNotesToStorage();
+    renderFilters();
+    renderNotes();
+    mostrarEstado('Nota eliminada');
+}
+
+function editNoteFromList(noteId) {
+    const targetNote = notes.find(note => note.id === noteId);
+    if (!targetNote) return;
+    populateFormFromNote(targetNote);
+    mostrarEstado('Editando nota');
+}
+
+function loadNoteIntoEditor(noteId) {
+    const targetNote = notes.find(note => note.id === noteId);
+    if (!targetNote) return;
+
+    tinymce.get('editor').setContent(targetNote.content || '');
+    currentSelectedNoteId = targetNote.id;
+    populateFormFromNote(targetNote);
+    mostrarEstado('Nota cargada en el editor');
+}
+
+function cargarNotaAlEditor() {
+    if (!currentSelectedNoteId) {
+        mostrarEstado('Primero selecciona o guarda una nota');
+        return;
+    }
+    loadNoteIntoEditor(currentSelectedNoteId);
+}
+
+function toggleSidebar() {
+    notesPanel.classList.toggle('collapsed');
+}
+
+function exportarNotasXml() {
+    const xml = serializeNotesToXml(notes);
+    const blob = new Blob([xml], { type: 'application/xml;charset=utf-8' });
+    const enlace = document.createElement('a');
+    enlace.href = URL.createObjectURL(blob);
+    enlace.download = 'notes.xml';
+    document.body.appendChild(enlace);
+    enlace.click();
+    document.body.removeChild(enlace);
+    URL.revokeObjectURL(enlace.href);
+    mostrarEstado('Archivo XML exportado');
+}
+
+async function importarNotasXml() {
+    importXmlInput.value = '';
+    importXmlInput.click();
+}
+
+importXmlInput.addEventListener('change', async (event) => {
+    const [file] = event.target.files || [];
+    if (!file) return;
+
+    try {
+        const xmlText = await file.text();
+        const imported = loadNotesFromXml(xmlText);
+        const importedCategories = loadCategoriesFromXml(xmlText);
+        if (!imported.length) {
+            mostrarEstado('El archivo XML no contiene notas válidas');
+            return;
+        }
+
+        notes = imported;
+        categories = importedCategories.length ? importedCategories : DEFAULT_CATEGORIES.slice();
+        currentFilter = 'all';
+        currentSelectedNoteId = imported[0].id;
+        saveNotesToStorage();
+        saveCategoriesToStorage();
+        renderCategorySelect();
+        renderFilters();
+        renderNotes();
+        populateFormFromNote(imported[0]);
+        mostrarEstado('Notas importadas correctamente');
+    } catch (error) {
+        console.error(error);
+        mostrarEstado('El XML no se pudo importar');
+    }
+});
+
+document.querySelectorAll('.swatch').forEach(button => {
+    button.addEventListener('click', () => {
+        selectedColor = button.dataset.color || '#fff4a3';
+        document.querySelectorAll('.swatch').forEach(swatch => swatch.classList.toggle('active', swatch === button));
+    });
+});
+
+addCategoryBtn.addEventListener('click', () => {
+    newCategoryContainer.style.display = 'flex';
+    newCategoryContainer.style.flexDirection = 'column';
+    newCategoryInput.focus();
+});
+
+function addNewCategory() {
+    const newCat = newCategoryInput.value.trim();
+    if (!newCat) {
+        mostrarEstado('El nombre de la categoría no puede estar vacío');
+        return;
+    }
+
+    if (categories.includes(newCat)) {
+        mostrarEstado('Esta categoría ya existe');
+        return;
+    }
+
+    categories.push(newCat);
+    saveCategoriesToStorage();
+    renderCategorySelect();
+    renderFilters();
+    newCategoryInput.value = '';
+    newCategoryContainer.style.display = 'none';
+    mostrarEstado('Categoría agregada');
+}
+
+saveCategoryBtn.addEventListener('click', addNewCategory);
+cancelCategoryBtn.addEventListener('click', () => {
+    newCategoryContainer.style.display = 'none';
+    newCategoryInput.value = '';
+});
+
+newCategoryInput.addEventListener('keypress', (event) => {
+    if (event.key === 'Enter') {
+        addNewCategory();
+    }
+});
+
+// Funciones del modal de ayuda
+function openHelpModal() {
+    const helpModal = document.getElementById('helpModal');
+    helpModal.classList.remove('hidden');
+}
+
+function closeHelpModal() {
+    const helpModal = document.getElementById('helpModal');
+    helpModal.classList.add('hidden');
+}
+
+// Cerrar modal al hacer clic fuera del contenido
+document.addEventListener('click', (event) => {
+    const helpModal = document.getElementById('helpModal');
+    if (event.target === helpModal) {
+        closeHelpModal();
+    }
+});
+
+// Cerrar modal con ESC
+document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+        closeHelpModal();
+    }
+});
+
+async function initEditor() {
+    tinymce.init({
+        selector: '#editor',
+        height: 650,
+        license_key: 'gpl',
+        menubar: true,
+
+        plugins: [
+            'lists',
+            'link',
+            'image',
+            'table',
+            'code',
+            'autolink',
+            'visualblocks',
+            'wordcount'
+        ],
+
+        toolbar:
+            'undo redo | ' +
+            'styles | bold italic underline forecolor | ' +
+            'alignleft aligncenter alignright alignjustify | ' +
+            'bullist numlist outdent indent | ' +
+            'link image table | ' +
+            'code visualblocks',
+
+        paste_data_images: true,
+        automatic_uploads: false,
+
+        images_upload_handler: function () {
+            return Promise.reject('No se utiliza servidor. Las imágenes se almacenan en Base64.');
+        },
+
+        branding: false,
+
+        content_style: `
+            body {
+                font-family: Arial, sans-serif;
+                font-size: 14px;
+            }
+            img {
+                max-width: 100%;
+                height: auto;
+            }
+        `
+    });
+
+    await loadNotesAtStartup();
+}
+
+async function copiarHTML() {
+    const contenido = tinymce.get('editor').getContent();
+
+    try {
+        await navigator.clipboard.writeText(contenido);
+        mostrarEstado('HTML copiado al portapapeles');
+    } catch (error) {
+        alert('No se pudo copiar el contenido');
+    }
+}
+
+function descargarHTML() {
+    const contenido = tinymce.get('editor').getContent();
+    const blob = new Blob([contenido], { type: 'text/html;charset=utf-8' });
+    const enlace = document.createElement('a');
+    enlace.href = URL.createObjectURL(blob);
+    enlace.download = 'contenido.html';
+    document.body.appendChild(enlace);
+    enlace.click();
+    document.body.removeChild(enlace);
+    URL.revokeObjectURL(enlace.href);
+    mostrarEstado('Archivo HTML descargado');
+}
+
+initEditor();
+</script>
+
+</body>
+</html>

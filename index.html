@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editor TinyMCE con notas reutilizables</title>
+    
+    <script src="./tinymce_8.6.0/tinymce/js/tinymce/tinymce.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+<div class="layout">
+    <div class="editor-panel">
+        <h2>Editor TinyMCE + Imágenes Base64</h2>
+
+        <div class="toolbar-custom">
+            <button onclick="copiarHTML()">Copiar HTML</button>
+            <button onclick="descargarHTML()">Descargar HTML</button>
+            <button class="secondary" onclick="guardarNotaDesdeEditor()">Guardar como nota</button>
+            <button class="secondary" onclick="toggleSidebar()">Notas</button>
+            <button class="secondary" onclick="exportarNotasXml()">Exportar XML</button>
+            <button class="secondary" onclick="importarNotasXml()">Importar XML</button>
+            <button class="secondary" onclick="openHelpModal()" title="Ayuda" style="margin-left: auto;">❓</button>
+        </div>
+
+        <textarea id="editor"></textarea>
+        <div id="status"></div>
+    </div>
+
+    <aside id="notesPanel" class="notes-panel">
+        <div class="panel-header">
+            <h3>Notas</h3>
+            <button class="small" onclick="toggleSidebar()" aria-label="Colapsar panel">☰</button>
+        </div>
+
+        <div class="panel-body">
+            <div class="note-creator">
+                <input id="noteTitle" type="text" placeholder="Título de la nota" />
+
+                <div style="display: flex; gap: 8px;">
+                    <select id="noteCategory" style="flex: 1;"></select>
+                    <button id="addCategoryBtn" class="small" type="button" title="Agregar categoría">+</button>
+                </div>
+
+                <div id="newCategoryContainer" style="display: none; flex-direction: column; gap: 8px;">
+                    <input id="newCategoryInput" type="text" placeholder="Nombre de la categoría" style="width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; background: #fff; font: inherit; color: var(--text);" />
+                    <div style="display: flex; gap: 8px;">
+                        <button id="saveCategoryBtn" class="primary small" type="button">Guardar</button>
+                        <button id="cancelCategoryBtn" class="small ghost" type="button">Cancelar</button>
+                    </div>
+                </div>
+
+                <div class="color-picker" id="colorPicker">
+                    <button class="swatch active" data-color="#fff4a3" style="background:#fff4a3" type="button" title="Amarillo"></button>
+                    <button class="swatch" data-color="#ffd7e6" style="background:#ffd7e6" type="button" title="Rosa"></button>
+                    <button class="swatch" data-color="#d7f7d7" style="background:#d7f7d7" type="button" title="Verde"></button>
+                    <button class="swatch" data-color="#d6e8ff" style="background:#d6e8ff" type="button" title="Azul"></button>
+                    <button class="swatch" data-color="#eadbff" style="background:#eadbff" type="button" title="Morado"></button>
+                </div>
+
+                <div class="creator-actions">
+                    <button id="saveNoteBtn" class="primary" type="button" onclick="guardarNotaDesdeEditor()">Guardar del editor</button>
+                    <button class="ghost" type="button" onclick="cargarNotaAlEditor()">Cargar al editor</button>
+                    <button id="clearNoteBtn" class="ghost" type="button" onclick="limpiarFormulario()" style="display:none;">Limpiar</button>
+                </div>
+            </div>
+
+            <div class="filter-bar" id="filters"></div>
+            <div id="notesContainer" class="notes-grid"></div>
+        </div>
+    </aside>
+</div>
+
+<input id="importXmlInput" type="file" accept=".xml" class="hidden" />
+
+<!-- Modal de Ayuda -->
+<div id="helpModal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Ayuda de Uso</h2>
+            <button class="modal-close" onclick="closeHelpModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="help-section">
+                <h3>📝 Editor Principal (TinyMCE)</h3>
+                <p>Editor de texto enriquecido para crear y editar contenido con formatos como:</p>
+                <ul>
+                    <li><strong>Estilos:</strong> Negrita, cursiva, subrayado</li>
+                    <li><strong>Listas:</strong> Numeradas y sin numerar</li>
+                    <li><strong>Tablas:</strong> Inserta y edita tablas</li>
+                    <li><strong>Imágenes:</strong> Se guardan en Base64 (dentro del documento)</li>
+                    <li><strong>Vínculos:</strong> Agrega enlaces a textos</li>
+                    <li><strong>Código:</strong> Visualiza el código fuente HTML</li>
+                </ul>
+            </div>
+
+            <div class="help-section">
+                <h3>💾 Botones de Toolbar Principal</h3>
+                <ul>
+                    <li><strong>Copiar HTML:</strong> Copia el contenido HTML actual al portapapeles</li>
+                    <li><strong>Descargar HTML:</strong> Descarga el contenido como archivo .html</li>
+                    <li><strong>Guardar como nota:</strong> Guarda el contenido actual en una nota reutilizable</li>
+                    <li><strong>Notas:</strong> Abre/cierra el panel lateral de notas</li>
+                    <li><strong>Exportar XML:</strong> Descarga todas las notas en formato XML</li>
+                    <li><strong>Importar XML:</strong> Carga notas de un archivo XML anteriormente exportado</li>
+                </ul>
+            </div>
+
+            <div class="help-section">
+                <h3>📌 Panel Lateral (Notas Reutilizables)</h3>
+                <p><strong>Crear una nota:</strong></p>
+                <ol>
+                    <li>Escribe el contenido en el editor TinyMCE</li>
+                    <li>Completa el <strong>Título</strong> en el panel lateral</li>
+                    <li>Selecciona una <strong>Categoría</strong></li>
+                    <li>Elige un <strong>Color</strong> para la tarjeta</li>
+                    <li>Haz clic en <strong>"Guardar del editor"</strong></li>
+                </ol>
+
+                <p><strong>Editar una nota:</strong></p>
+                <ol>
+                    <li>Haz clic en <strong>"Editar"</strong> en la tarjeta de la nota</li>
+                    <li>El botón cambiará a <strong>"✎ Actualizar nota"</strong> (verde)</li>
+                    <li>Modifica el título, categoría o color según necesites</li>
+                    <li>Edita el contenido en el editor TinyMCE</li>
+                    <li>Haz clic en <strong>"Actualizar nota"</strong></li>
+                    <li>Haz clic en <strong>"Limpiar"</strong> cuando termines</li>
+                </ol>
+
+                <p><strong>Cargar una nota en el editor:</strong></p>
+                <ol>
+                    <li>Haz clic en <strong>"Abrir"</strong> en la tarjeta de la nota</li>
+                    <li>El contenido aparecerá en el editor TinyMCE</li>
+                    <li>Ahora puedes editarlo y guardar cambios</li>
+                </ol>
+
+                <p><strong>Eliminar una nota:</strong></p>
+                <ol>
+                    <li>Haz clic en <strong>"Borrar"</strong> en la tarjeta de la nota</li>
+                    <li>La nota se eliminará inmediatamente</li>
+                </ol>
+            </div>
+
+            <div class="help-section">
+                <h3>🏷️ Categorías Dinámicas</h3>
+                <p>Puedes crear tus propias categorías:</p>
+                <ol>
+                    <li>Haz clic en el botón <strong>"+"</strong> junto al selector de categoría</li>
+                    <li>Escribe el nombre de la nueva categoría</li>
+                    <li>Presiona <strong>Enter</strong> o haz clic en <strong>"Guardar"</strong></li>
+                    <li>Puedes usar esta categoría en tus notas</li>
+                </ol>
+            </div>
+
+            <div class="help-section">
+                <h3>🎨 Colores de Notas</h3>
+                <p>Cada nota puede tener un color diferente para organizarlas visualmente:</p>
+                <ul>
+                    <li>🟨 Amarillo</li>
+                    <li>🟩 Verde</li>
+                    <li>🟦 Azul</li>
+                    <li>🟥 Rosa/Rojo</li>
+                    <li>🟪 Morado</li>
+                </ul>
+            </div>
+
+            <div class="help-section">
+                <h3>💾 Persistencia de Datos</h3>
+                <p>Las notas se guardan automáticamente en <strong>localStorage</strong> del navegador:</p>
+                <ul>
+                    <li>Al cerrar y abrir el navegador, tus notas se mantienen</li>
+                    <li>Para hacer una copia de seguridad, exporta a XML</li>
+                    <li>Para restaurar notas, importa el archivo XML</li>
+                </ul>
+            </div>
+
+            <div class="help-section">
+                <h3>📊 Filtrar por Categoría</h3>
+                <p>Los botones de filtro en el panel te permiten:</p>
+                <ul>
+                    <li>Ver todas las notas (botón "Todas")</li>
+                    <li>Ver solo notas de una categoría específica</li>
+                    <li>Reordenar notas arrastrándolas entre ellas</li>
+                </ul>
+            </div>
+
+            <div class="help-section">
+                <h3>💡 Consejos</h3>
+                <ul>
+                    <li>Usa diferentes colores para categorías visuales</li>
+                    <li>Las imágenes insertadas en el editor se guardan en Base64</li>
+                    <li>Exporta regularmente tus notas como backup</li>
+                    <li>Puedes editar notas rápidamente desde las tarjetas</li>
+                    <li>El contenido del editor se mantiene mientras trabajas</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
