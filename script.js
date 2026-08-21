@@ -719,10 +719,24 @@ function initEditor() {
         license_key: 'gpl',
         paste_data_images: true,
         plugins: ['lists', 'link', 'image', 'table', 'code', 'autolink', 'visualblocks', 'wordcount'],
-        toolbar: 'undo redo | formatselect | bold italic underline | alignleft aligncenter alignright | bullist numlist | link image table | code visualblocks | removeformat',
+        plugins: ['accordion', 'advlist', 'anchor', 'autolink',  'autosave', 'charmap', 'code', 'codesample', 'directionality', 'emoticons', 'fullscreen', 'help', 'image', 'importcss', 'insertdatetime', 'link', 'lists', 'media',    'nonbreaking', 'pagebreak', 'preview', /*'quickbars',*/ 'save', 'searchreplace',    'table', 'visualblocks', 'visualchars', 'wordcount',    /* Premium plugins for demo purposes only */    'mediaembed',  ],
+        toolbar: 'undo redo | blocks fontfamily fontsize | formatselect | bold italic underline | alignleft aligncenter alignright | bullist numlist | link image table | code visualblocks | removeformat',
+        toolbar: "clearbutton undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | align numlist bullist | link image | table media | lineheight outdent indent| forecolor backcolor removeformat | charmap emoticons | code fullscreen preview | save print | pagebreak anchor codesample | ltr rtl | accordion accordionremove | ",
+        toolbar_mode: 'sliding',
         setup: (editor) => {
             editor.on('init', async () => {
                 await loadNotesAtStartup();
+            });
+            
+            editor.ui.registry.addButton('clearbutton', {                
+                icon: 'new-document',  // Icono opcional de la librería de TinyMCE
+                tooltip: 'Clear all the content in the editor', // Tooltip al pasar el mouse
+                onAction: function () {
+                    // 3. Define la acción para vaciar el editor
+                    editor.setContent(''); 
+                    // Opcional: Enfocar el editor automáticamente después de limpiar
+                    editor.focus(); 
+                }
             });
         }
     });
