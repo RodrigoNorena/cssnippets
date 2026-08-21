@@ -3,8 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="application-name" content="CS Snippets">
+    <meta name="apple-mobile-web-app-title" content="CS Snippets">
+    <meta name="theme-color" content="#0f172a">
     <title>CS Snippets</title>
-    
+
+    <link rel="icon" type="image/svg+xml" href="./app-icon.svg">
+    <link rel="apple-touch-icon" href="./app-icon.svg">
     <script src="./tinymce_8.6.0/tinymce/js/tinymce/tinymce.min.js"></script>
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -13,7 +18,10 @@
 
 <div class="layout">
     <div class="editor-panel">
-        <h2>CS Snippets</h2>
+        <div class="app-title-wrap">
+            <img src="./app-icon.svg" alt="CS Snippets" class="app-title-icon" />
+            <h2>CS Snippets</h2>
+        </div>
 
         <div class="toolbar-custom">
             <button onclick="copiarHTML()">Copiar HTML</button>
