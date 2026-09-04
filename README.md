@@ -12,6 +12,12 @@ TinyHTMLEditor/
 ├── TinyHTMLEditor.html     # Archivo original (monolítico, para referencia)
 ├── notes.xml               # Archivo de datos para importar/exportar notas
 ├── README.md               # Este archivo
+├── chrome-extension/       # Extensión de Chrome (popup de copia/pegado rápido)
+│   ├── manifest.json
+│   ├── content-script.js   # Sincroniza notas (localStorage -> chrome.storage.local)
+│   ├── focus-tracker.js    # Recuerda el campo enfocado para el botón "Pegar"
+│   ├── popup.html / popup.js / popup.css
+│   └── README.md           # Instrucciones de instalación de la extensión
 └── tinymce_8.6.0/          # Librería TinyMCE local
     └── tinymce/
         └── js/tinymce/     # Archivos minificados de TinyMCE
@@ -143,6 +149,22 @@ Haz clic en el botón ❓ en la barra de herramientas para ver instrucciones det
 - Navegador moderno con JavaScript habilitado
 - Soporte para localStorage
 - No requiere servidor
+
+## 🧩 Extensión de Chrome (Copia Rápida)
+
+La carpeta [`chrome-extension/`](chrome-extension/README.md) contiene una extensión que **convive** con esta app web (no la reemplaza):
+
+- Sincroniza las notas de `localStorage` hacia `chrome.storage.local` mientras `index.html` esté abierto (vía `content-script.js`).
+- El popup permite buscar y filtrar por categoría (recuerda la última categoría elegida).
+- **Copiar:** copia la nota con formato (HTML + texto plano) al portapapeles, igual que "Copiar nota con formato" en el editor.
+- **Pegar:** inserta la nota con formato en el último campo que tuvo el foco en la pestaña activa (útil para pegar directo en otras páginas sin volver al editor).
+
+**Instalación:**
+1. Ir a `chrome://extensions` y activar "Modo de desarrollador".
+2. Clic en "Cargar descomprimida" y seleccionar la carpeta `chrome-extension`.
+3. Si abres `index.html` como archivo local (`file://`), habilita "Permitir acceso a las URL de archivos" en los detalles de la extensión.
+
+Más detalles en [chrome-extension/README.md](chrome-extension/README.md).
 
 ## 📄 Licencia
 

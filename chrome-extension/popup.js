@@ -21,6 +21,22 @@ function stripHtml(html) {
     return (temp.textContent || temp.innerText || '').replace(/\s+/g, ' ').trim();
 }
 
+// Copia HTML + texto plano al portapapeles, igual que "Copiar nota con formato" en la app web
+function copyNoteFormatted(html) {
+    const temp = document.createElement('div');
+    temp.innerHTML = html || '';
+    const plainText = temp.innerText || temp.textContent || '';
+
+    if (navigator.clipboard && window.ClipboardItem) {
+        const clipboardData = {
+            'text/html': new Blob([html || ''], { type: 'text/html' }),
+            'text/plain': new Blob([plainText], { type: 'text/plain' })
+        };
+        return navigator.clipboard.write([new ClipboardItem(clipboardData)]);
+    }
+    return navigator.clipboard.writeText(plainText);
+}
+
 function showStatus(text) {
     statusEl.textContent = text;
     clearTimeout(showStatus.timeoutId);
@@ -75,8 +91,8 @@ function render() {
         button.addEventListener('click', () => {
             const note = allNotes.find(item => item.id === button.dataset.id);
             if (!note) return;
-            navigator.clipboard.writeText(note.content || '')
-                .then(() => showStatus('Copiado'))
+            copyNoteFormatted(note.content || '')
+                .then(() => showStatus('Copiado con formato'))
                 .catch(() => showStatus('Error al copiar'));
         });
     });

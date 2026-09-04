@@ -11,8 +11,9 @@ el contenido de cualquiera al portapapeles sin abrir el editor completo.
   al abrir el popup la pestaña pierde el foco y `document.activeElement` pasa a ser
   `<body>`. El botón "Pegar" le manda un mensaje a ese script para insertar el texto.
 - `popup.html`/`popup.js` leen `chrome.storage.local` y muestran la lista con buscador,
-  filtro por categoría y botones "Copiar" (copia el HTML crudo, igual que "Copiar HTML")
-  y "Pegar" (inserta el HTML crudo en el último campo enfocado de la pestaña activa).
+  filtro por categoría y botones "Copiar" (copia HTML + texto plano al portapapeles vía
+  `ClipboardItem`, igual que "Copiar nota con formato") y "Pegar" (inserta la nota con
+  formato en el último campo enfocado de la pestaña activa).
 
 ## Instalar en Chrome
 1. Ir a `chrome://extensions`.
