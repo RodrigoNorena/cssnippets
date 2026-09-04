@@ -6,7 +6,28 @@
     <category name="Cloud Task" />
     <category name="Watch" />
     <category name="Closing" />
+    <category name="Scaling" />
+    <category name="Response" />
   </categories>
+  <note id="5da31e25-6e0d-4397-a496-9e3484c4039c" title="Patch" category="Cloud Task" color="#d6e8ff" createdAt="2026-09-02T08:03:50.168Z" updatedAt="2026-09-02T08:03:50.169Z">
+    <content><![CDATA[<p>Hola Compa&ntilde;eros,</p>
+<p>Por favor su ayuda con esta tarea:</p>
+<p>- Cliente: B&rsquo;information Services (BTL)<br>- Proyecto: workflows<br>- Ambiente(s): Dev<br>- Actividad(es):&nbsp; Aplicar la receta "12.45.99-support-fall25-btl+20260827.6 [GA - FALL25 - DEV-WORKFLOWS-BTL] - 2026.08.27.20:17"<br>- Fecha y Hora de Inicio: 2026-09-02 18:00+ CET<br>- Duraci&oacute;n estimada: 60 min<br>- Time Zone: CEST (UTC+2)<br>- Notificar al cliente: Yes</p>
+<p>Saludos.</p>]]></content>
+  </note>
+  <note id="c4868f54-8371-4e23-b459-6f64d86811f3" title="PatchRelease" category="Response" color="#fff4a3" createdAt="2026-09-01T11:28:07.804Z" updatedAt="2026-09-01T11:28:17.552Z">
+    <content><![CDATA[<p>Dear Customer,</p>
+<p>We are pleased to inform you that the new version&nbsp;<strong>12.45.99-support-fall25-btl</strong>&nbsp;of the Engine has been released. This version includes the necessary adjustments to resolve the reported issue.</p>
+<p>To proceed with the installation of this patch, we kindly ask you to provide a preferred date and time for deploying it in your&nbsp;<strong>Development environment</strong>&nbsp;as the initial step.</p>
+<p>If you have any questions or require further assistance, please do not hesitate to let us know.</p>
+<p>Best regards,<br>Bizagi Support Team</p>]]></content>
+  </note>
+  <note id="874bfd0c-7b49-402e-8978-75dd88902af8" title="Replicated1" category="Scaling" color="#d6e8ff" createdAt="2026-08-27T07:20:12.682Z" updatedAt="2026-08-27T07:20:18.295Z">
+    <content><![CDATA[<p>Dear Customer,&nbsp;</p>
+<p>This issue has been succesfully replicated and queued to be fixed by our Dev team. We will be updating &nbsp;this ticket &nbsp;as soon as we have any information.</p>
+<p>Kind regards,</p>
+<p>Bizagi Support Team</p>]]></content>
+  </note>
   <note id="bab01127-cb31-4c7c-a043-746a328dfc2d" title="Thanks1" category="Closing" color="#fff4a3" createdAt="2026-08-18T09:51:45.390Z" updatedAt="2026-08-18T09:51:58.667Z">
     <content><![CDATA[<p>Dear Customer,</p>
 <p>Thank you for your confirmation, we will now proceed to close this ticket according to your indications.</p>

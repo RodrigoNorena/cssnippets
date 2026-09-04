@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "CS Snippets - Copia Rápida",
+  "version": "1.0.0",
+  "description": "Copia el contenido de tus notas de CS Snippets al portapapeles desde cualquier pestaña.",
+  "permissions": ["storage"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "CS Snippets"
+  },
+  "content_scripts": [
+    {
+      "matches": ["file:///*", "http://localhost/*", "http://127.0.0.1/*"],
+      "js": ["content-script.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

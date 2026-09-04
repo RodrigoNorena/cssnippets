@@ -284,6 +284,12 @@ function reorderNotes(sourceId, targetId) {
 
 function saveNotesToStorage() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
+    syncNotesToExtension();
+}
+
+// Notifica a la extensión de Chrome (content script) para que copie las notas a chrome.storage
+function syncNotesToExtension() {
+    window.dispatchEvent(new CustomEvent('tinyhtml-notes-sync', { detail: notes }));
 }
 
 function readNotesFromStorage() {
@@ -392,6 +398,7 @@ async function loadNotesAtStartup() {
         renderCategorySelect();
         renderNotes();
         renderFilters();
+        syncNotesToExtension();
         return;
     }
 
@@ -421,6 +428,7 @@ async function loadNotesAtStartup() {
     renderCategorySelect();
     renderNotes();
     renderFilters();
+    syncNotesToExtension();
 }
 
 function populateFormFromNote(note) {
@@ -721,7 +729,7 @@ function initEditor() {
         plugins: ['lists', 'link', 'image', 'table', 'code', 'autolink', 'visualblocks', 'wordcount'],
         plugins: ['accordion', 'advlist', 'anchor', 'autolink',  'autosave', 'charmap', 'code', 'codesample', 'directionality', 'emoticons', 'fullscreen', 'help', 'image', 'importcss', 'insertdatetime', 'link', 'lists', 'media',    'nonbreaking', 'pagebreak', 'preview', /*'quickbars',*/ 'save', 'searchreplace',    'table', 'visualblocks', 'visualchars', 'wordcount',    /* Premium plugins for demo purposes only */    'mediaembed',  ],
         toolbar: 'undo redo | blocks fontfamily fontsize | formatselect | bold italic underline | alignleft aligncenter alignright | bullist numlist | link image table | code visualblocks | removeformat',
-        toolbar: "clearbutton undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | align numlist bullist | link image | table media | lineheight outdent indent| forecolor backcolor removeformat | charmap emoticons | code fullscreen preview | save print | pagebreak anchor codesample | ltr rtl | accordion accordionremove | ",
+        toolbar: "clearbutton | undo redo | fontfamily fontsize | bold italic underline strikethrough | forecolor backcolor removeformat | align numlist bullist | link image | lineheight outdent indent| charmap emoticons | code fullscreen preview | anchor codesample | ltr rtl | accordion accordionremove | ",
         toolbar_mode: 'sliding',
         setup: (editor) => {
             editor.on('init', async () => {
