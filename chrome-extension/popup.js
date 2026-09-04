@@ -60,7 +60,10 @@ function render() {
             <div class="note-item" style="--note-color: ${escapeHtml(note.color || '#fff4a3')}">
                 <div class="note-item-header">
                     <span class="note-cat">${escapeHtml(note.category || 'General')}</span>
-                    <button type="button" class="copy-btn" data-id="${escapeHtml(note.id)}">Copiar</button>
+                    <div class="note-item-actions">
+                        <button type="button" class="copy-btn" data-id="${escapeHtml(note.id)}">Copiar</button>
+                        <button type="button" class="paste-btn" data-id="${escapeHtml(note.id)}" title="Pegar en el campo activo de la pestaña">Pegar</button>
+                    </div>
                 </div>
                 <div class="note-item-title">${escapeHtml(note.title || 'Sin título')}</div>
                 <div class="note-item-preview">${escapeHtml(preview.slice(0, 90))}${preview.length > 90 ? '...' : ''}</div>
@@ -77,6 +80,16 @@ function render() {
                 .catch(() => showStatus('Error al copiar'));
         });
     });
+
+    listEl.querySelectorAll('.paste-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            const note = allNotes.find(item => item.id === button.dataset.id);
+            if (!note) return;
+            pasteIntoActiveField(note.content)
+                .then(success => showStatus(success ? 'Pegado' : 'No hay campo activo'))
+                .catch(() => showStatus('Error al pegar'));
+        });
+    });
 }
 
 function loadNotes() {
@@ -85,6 +98,29 @@ function loadNotes() {
         selectedCategory = result.selectedCategory || 'all';
         renderCategories();
         render();
+    });
+}
+
+// Inserta el contenido en el último campo editable enfocado, recordado por focus-tracker.js
+// (usa mensajes en vez de document.activeElement porque el popup ya le robó el foco a la pestaña)
+function pasteIntoActiveField(content) {
+    return chrome.tabs.query({ active: true, currentWindow: true }).then(([tab]) => {
+        if (!tab?.id) return false;
+
+        const messaging = new Promise((resolve) => {
+            chrome.tabs.sendMessage(tab.id, { type: 'cs-snippets-paste', content: content || '' }, (response) => {
+                if (chrome.runtime.lastError) {
+                    resolve(false);
+                    return;
+                }
+                resolve(response?.success === true);
+            });
+        });
+
+        // Salvaguarda: si ningún frame respondió (ej. sitio sin content script), no colgar el botón
+        const timeout = new Promise((resolve) => setTimeout(() => resolve(false), 800));
+
+        return Promise.race([messaging, timeout]);
     });
 }
 

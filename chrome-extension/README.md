@@ -6,9 +6,13 @@ el contenido de cualquiera al portapapeles sin abrir el editor completo.
 ## Cómo funciona
 - `content-script.js` se inyecta en la página de CS Snippets y copia `localStorage`
   (clave `tinyhtml-notes-v1`) hacia `chrome.storage.local` cada vez que se guardan notas.
+- `focus-tracker.js` se inyecta en todas las páginas (`<all_urls>`) y recuerda el
+  último campo editable (`input`, `textarea` o `contentEditable`) que tuvo foco, porque
+  al abrir el popup la pestaña pierde el foco y `document.activeElement` pasa a ser
+  `<body>`. El botón "Pegar" le manda un mensaje a ese script para insertar el texto.
 - `popup.html`/`popup.js` leen `chrome.storage.local` y muestran la lista con buscador,
-  filtro por categoría y botón "Copiar" (copia el HTML crudo de la nota, igual que
-  "Copiar HTML" en el editor).
+  filtro por categoría y botones "Copiar" (copia el HTML crudo, igual que "Copiar HTML")
+  y "Pegar" (inserta el HTML crudo en el último campo enfocado de la pestaña activa).
 
 ## Instalar en Chrome
 1. Ir a `chrome://extensions`.

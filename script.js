@@ -727,7 +727,7 @@ function initEditor() {
         license_key: 'gpl',
         paste_data_images: true,
         plugins: ['lists', 'link', 'image', 'table', 'code', 'autolink', 'visualblocks', 'wordcount'],
-        plugins: ['accordion', 'advlist', 'anchor', 'autolink',  'autosave', 'charmap', 'code', 'codesample', 'directionality', 'emoticons', 'fullscreen', 'help', 'image', 'importcss', 'insertdatetime', 'link', 'lists', 'media',    'nonbreaking', 'pagebreak', 'preview', /*'quickbars',*/ 'save', 'searchreplace',    'table', 'visualblocks', 'visualchars', 'wordcount',    /* Premium plugins for demo purposes only */    'mediaembed',  ],
+        plugins: ['accordion', 'advlist', 'anchor', 'autolink',  'autosave', 'charmap', 'code', 'codesample', 'directionality', 'emoticons', 'fullscreen', 'help', 'image', 'importcss', 'insertdatetime', 'link', 'lists', 'media',    'nonbreaking', 'pagebreak', 'preview', /*'quickbars',*/ 'save', 'searchreplace',    'table', 'visualblocks', 'visualchars', 'wordcount' ],
         toolbar: 'undo redo | blocks fontfamily fontsize | formatselect | bold italic underline | alignleft aligncenter alignright | bullist numlist | link image table | code visualblocks | removeformat',
         toolbar: "clearbutton | undo redo | fontfamily fontsize | bold italic underline strikethrough | forecolor backcolor removeformat | align numlist bullist | link image | lineheight outdent indent| charmap emoticons | code fullscreen preview | anchor codesample | ltr rtl | accordion accordionremove | ",
         toolbar_mode: 'sliding',

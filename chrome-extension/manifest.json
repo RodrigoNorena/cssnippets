@@ -13,6 +13,13 @@
       "matches": ["file:///*", "http://localhost/*", "http://127.0.0.1/*"],
       "js": ["content-script.js"],
       "run_at": "document_idle"
+    },
+    {
+      "matches": ["<all_urls>"],
+      "js": ["focus-tracker.js"],
+      "run_at": "document_start",
+      "all_frames": true,
+      "match_origin_as_fallback": true
     }
   ]
 }

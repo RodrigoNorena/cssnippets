@@ -91,6 +91,25 @@ body {
     background: #475569;
 }
 
+.note-item-actions {
+    display: flex;
+    gap: 4px;
+}
+
+.paste-btn {
+    border: none;
+    background: #2563eb;
+    color: #e2e8f0;
+    border-radius: 4px;
+    padding: 3px 8px;
+    font-size: 11px;
+    cursor: pointer;
+}
+
+.paste-btn:hover {
+    background: #3b82f6;
+}
+
 .note-item-title {
     font-size: 13px;
     font-weight: 600;
